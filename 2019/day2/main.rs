@@ -60,36 +60,51 @@
 
 // To begin, get your puzzle input.
 
-fn main() {
-  let mut program: Vec<usize> = std::fs::read_to_string("input.txt").expect("Oh no!!")
-    .split(',')
-    .filter_map(|s| s.parse::<usize>().ok())
-    .collect();
-
-    let mut i = 0;
-    loop {
-      match program[i] {
-        1 | 2 => {
-          let first = program[i + 1];
-          let second = program[i + 2];
-          let third = program[i + 3];
-          let first_val = program[first];
-          let second_val = program[second];
-          match program[i] {
-            1 => program[third] = first_val + second_val,
-            2 => program[third] = first_val * second_val,
-            _ => {},
-          }
-          i += 4;
-        }, 
-        99 => {
-          println!("Halting program!");
-          break;
-        },
-        _ => {
-          panic!("Oh no!! something went horribly wrong");
+fn compute(noun: usize, verb: usize, program: &mut Vec<usize>) -> usize {
+  let mut i = 0;
+  program[1] = noun;
+  program[2] = verb;
+  loop {
+    match &program[i] {
+      1 | 2 => {
+        let first = program[i + 1];
+        let second = program[i + 2];
+        let third = program[i + 3];
+        let first_val = program[first];
+        let second_val = program[second];
+        match program[i] {
+          1 => program[third] = first_val + second_val,
+          2 => program[third] = first_val * second_val,
+          _ => {},
         }
+        i += 4;
+      }, 
+      99 => {
+        break;
+      },
+      _ => {
+        panic!("Oh no!! something went horribly wrong");
       }
     }
-    println!("{}", program[0]);
+  }
+  program[0]
+}
+
+fn main() {
+  let program: Vec<usize> = std::fs::read_to_string("input.txt").expect("Oh no!!")
+  .split(',')
+  .filter_map(|s| s.parse::<usize>().ok())
+  .collect();
+
+  for noun in 0..=99 {
+    for verb in 0..=99 {
+      match compute(noun, verb, &mut program.clone()) {
+        19690720 => {
+          println!("noun: {}, verb: {}", noun, verb);
+          println!("{}", 100 * noun + verb );
+        },
+        _ => {},
+      }
+    }
+  }
 }
