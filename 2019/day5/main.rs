@@ -52,18 +52,21 @@ impl Computer {
        self.ip += size;
    }
 
-   fn compute(&mut self) -> isize {
+   fn compute(&mut self) {
        loop {
             match self.current_opcode() {
                 1 => self.add(),
                 2 => self.multiply(),
                 3 => self.input(),
                 4 => self.output(),
+                5 => self.jump_if_true(),
+                6 => self.jump_if_false(),
+                7 => self.less_than(),
+                8 => self.equal_to(),
                 99 => break,
                 invalid_opcode => panic!("Invalid opcode {}", invalid_opcode),
             }
         }
-       self.get(0)
    }
 
    // op 1
@@ -101,6 +104,56 @@ impl Computer {
         self.step(2);
     }
 
+    // op5
+    fn jump_if_true(&mut self) {
+        let in1 = self.arg(1);
+        if in1 != 0 {
+            let in2 = self.arg(2) as usize;
+            self.ip = in2;
+        } else {
+            // Do Nothing
+            self.step(3);
+        }
+    }
+
+    // op6
+    fn jump_if_false(&mut self) {
+        let in1 = self.arg(1);
+        if in1 == 0 {
+            let in2 = self.arg(2) as usize;
+            self.ip = in2;
+        } else {
+            // Do nothing
+            self.step(3);
+        }
+    }
+
+    // op7
+    fn less_than(&mut self) {
+        let in1 = self.arg(1);
+        let in2 = self.arg(2);
+        let out = self.output_address(3);
+        if in1 < in2 {
+            self.set(out, 1);
+        } else {
+            self.set(out, 0);
+        }
+        self.step(4);
+    }
+
+    // op 8
+    fn equal_to(&mut self) {
+        let in1 = self.arg(1);
+        let in2 = self.arg(2);
+        let out = self.output_address(3);
+        if in1 == in2 {
+            self.set(out, 1);
+        } else {
+            self.set(out, 0);
+        }
+        self.step(4);
+    }
+
 }
 
 fn main() {
@@ -110,6 +163,5 @@ fn main() {
   .collect();
 
   let mut computer = Computer::new(input);
-
-  println!("{}", computer.compute());
+  computer.compute();
 }
